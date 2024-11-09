@@ -1,8 +1,11 @@
+import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 import os
 from fastapi import FastAPI
 import logging
+
+import uvloop
 
 from common.exception_handlers import final_error_handler
 from user.representation.apis import router as user_router
@@ -12,6 +15,7 @@ from config.session import create_db_and_tables
 log_folder = "logs"
 os.makedirs(log_folder, exist_ok=True)
 log_file_name = datetime.now().strftime("%Y-%m-%d.log")
+
 ### DOCUMENT: SQLAlchemy logger setup
 # go with echo=False to avoid duplicate logs)
 logging.config.dictConfig(
@@ -56,8 +60,12 @@ logging.config.dictConfig(
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await create_db_and_tables()
+    
     yield
 
+
+### DOCUMENT: Set uvloop as the default event loop policy
+asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 app = FastAPI(lifespan=lifespan)
 app.include_router(user_router)

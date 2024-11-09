@@ -6,38 +6,36 @@ project_root/
 │   ├── settings.py
 │   └── security.py
 ├── user/
-│   ├── api/
-│   │   └── user_routes.py
-│   ├── domain/
+│   ├── representation/            # Primarily for representation logic; includes application layer logic
+│   │   ├── apis.py
+│   │   ├── dependencies.py
+│   │   └── validations.py
+│   ├── domain/                    # Contains core domain logic, entities, aggregates, and value objects
 │   │   ├── entity.py
 │   │   ├── aggregate_root.py
 │   │   └── value_objects.py
-│   ├── infra/
-│   │   ├── database.py
+│   ├── infra/                     # Infrastructure layer, including ORM, repository, and external service clients
+│   │   ├── orm.py                 # ORM setup and database interactions for user module
+│   │   ├── repository.py          # Repository pattern for handling data persistence for user module
 │   │   └── services/
-│   │       └── email_client.py
-│   ├── use_case/
-│   │   ├── create_user_use_case.py
-│   │   └── get_user_use_case.py
-│   └── tests/
+│   │       └── email_client.py    # External service client for handling email communication
+│   └── tests/                     # Test files for user module
 │       ├── test_user_routes.py
-│       ├── test_create_user_use_case.py
-│       └── test_get_user_use_case.py
+│       └── test_user_validations.py
 ├── order/
-│   ├── api/
-│   │   └── order_routes.py
-│   ├── domain/
+│   ├── representation/            # Primarily for representation logic; includes application layer logic
+│   │   ├── apis.py
+│   │   ├── dependencies.py
+│   │   └── validations.py
+│   ├── domain/                    # Contains core domain logic, entities, aggregates, and value objects
 │   │   ├── entity.py
 │   │   ├── aggregate_root.py
 │   │   └── value_objects.py
-│   ├── infra/
-│   │   ├── database.py
+│   ├── infra/                     # Infrastructure layer, including ORM, repository, and external service clients
+│   │   ├── orm.py                 # ORM setup and database interactions for order module
+│   │   ├── repository.py          # Repository pattern for handling data persistence for order module
 │   │   └── services/
-│   │       └── payment_gateway.py
-│   ├── use_case/
-│   │   ├── create_order_use_case.py
-│   │   └── get_order_use_case.py
-│   └── tests/
+│   │       └── payment_gateway.py # External service client for handling payment processing
+│   └── tests/                     # Test files for order module
 │       ├── test_order_routes.py
-│       ├── test_create_order_use_case.py
-│       └── test_get_order_use_case.py
+│       └── test_order_validations.py

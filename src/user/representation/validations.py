@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, field_validator
 
 from user.base.model import UserBase
 from user.infra.repository import UserRepository
