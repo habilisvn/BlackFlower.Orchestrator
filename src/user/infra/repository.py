@@ -34,6 +34,7 @@ class UserRepository(AbstractRepository[UserEntity]):
 
         query = select(UserTable).where(
             or_(
+                UserTable.id == id if id else False,
                 UserTable.email == email if email else False,
                 UserTable.username == username if username else False,
             )
@@ -43,7 +44,8 @@ class UserRepository(AbstractRepository[UserEntity]):
         async with self.session.begin():
             users = await self.session.execute(query)
 
-        user = users.first()
+        ### DOCUMENT: Must call scalars() to retrieve enough fields
+        user = users.scalars().first()
         return user
 
     async def delete(self, user_id) -> None:

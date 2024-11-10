@@ -1,12 +1,9 @@
 from datetime import datetime
 import re
-from typing_extensions import Annotated
-from pydantic import Field, ValidationError, field_validator
-from pydantic.functional_validators import AfterValidator
+from pydantic import Field, field_validator
+import hashlib
 
 from user.base.model import UserBase
-from user.infra.repository import UserRepository
-from common.dependencies import SessionDependency
 
 
 class UserGetIn(UserBase):
@@ -29,7 +26,11 @@ class UserCreateIn(UserBase):
             raise ValueError("Password must contain at least one special character")
         if not re.search(r"[A-Z]", v):
             raise ValueError("Password must contain at least one uppercase letter")
-        return v
+
+        ### TEMPORARY: implementation to hash password
+        hash_pwd = hashlib.sha512(v.encode()).hexdigest()
+
+        return hash_pwd
 
 
 class UserPublic(UserBase):

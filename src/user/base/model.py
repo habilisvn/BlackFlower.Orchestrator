@@ -12,4 +12,3 @@ class UserBase(BaseModel):
     created_at: datetime
     updated_by: int | None = Field(default=None)
     updated_at: datetime
-    password: str | None

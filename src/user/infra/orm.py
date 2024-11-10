@@ -1,7 +1,7 @@
 from datetime import datetime
 from sqlalchemy.orm import mapped_column, Mapped
 
-from common.db import Base
+from common.alchemy import Base
 
 
 class UserTable(Base):
