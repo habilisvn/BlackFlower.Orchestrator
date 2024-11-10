@@ -1,7 +1,5 @@
 from typing import Annotated
 from fastapi import Depends
-from copy import deepcopy
-
 from fastapi.responses import JSONResponse
 
 from common.utils import iterate_validate
