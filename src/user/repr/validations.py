@@ -1,31 +1,26 @@
 from datetime import datetime
 import re
-from pydantic import Field, field_validator
+from typing_extensions import Annotated
+from pydantic import Field, ValidationError, field_validator
+from pydantic.functional_validators import AfterValidator
 
 from user.base.model import UserBase
 from user.infra.repository import UserRepository
+from common.dependencies import SessionDependency
 
 
 class UserGetIn(UserBase):
     username: str = Field(index=True, unique=True, nullable=False)
     password: str = Field(nullable=False, min_length=6)
 
-    @field_validator("username")
-    def validate_username(cls, username: str, userRepository: UserRepository) -> str:
-        existing_user = userRepository.get_user_by_username(username)
-        if existing_user:
-            raise ValueError("Username already exists")
-        return username
-
 
 class UserOut(UserBase):
     id: int
-    created_at: datetime
-    updated_at: datetime
 
 
 class UserCreateIn(UserBase):
-    username: str
+    updated_at: datetime = None
+    created_at: datetime = None
     password: str = Field(min_length=6)
 
     @field_validator("password")

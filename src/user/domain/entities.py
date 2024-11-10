@@ -1,9 +1,6 @@
-from dataclasses import dataclass
 from datetime import datetime
 
 from pydantic import BaseModel
-
-from user.base.model import UserBase
 
 
 class UserEntity(BaseModel):
@@ -12,9 +9,9 @@ class UserEntity(BaseModel):
     is_active: bool = True
     is_superuser: bool = False
     created_by: int | None
-    created_at: datetime = None
+    created_at: datetime | None = None
     updated_by: int | None
-    updated_at: datetime = None
+    updated_at: datetime | None = None
     password: str | None
     
     def update_email(self, new_email: str):

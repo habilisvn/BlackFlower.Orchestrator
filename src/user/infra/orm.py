@@ -9,7 +9,7 @@ class UserTable(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     email: Mapped[str] = mapped_column(unique=True)
-    username: Mapped[str | None]
+    username: Mapped[str] = mapped_column(unique=True)
     password: Mapped[str]
     is_active: Mapped[bool] = mapped_column(default=True)
     is_superuser: Mapped[bool] = mapped_column(default=False)

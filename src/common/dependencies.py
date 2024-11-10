@@ -10,7 +10,7 @@ engine = create_async_engine(settings.postgresql_url, echo=False)
 
 
 async def get_session():
-    async with async_sessionmaker[AsyncSession](engine)() as session:
+    async with async_sessionmaker[AsyncSession](engine, expire_on_commit=False)() as session:
         yield session
 
 SessionDependency = Annotated[AsyncSession, Depends(get_session)]

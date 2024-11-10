@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from datetime import datetime
 from pydantic import BaseModel, EmailStr
 from sqlmodel import Field
 
@@ -9,5 +9,7 @@ class UserBase(BaseModel):
     is_active: bool = Field(default=True)
     is_superuser: bool = Field(default=False)
     created_by: int | None = Field(default=None)
+    created_at: datetime
     updated_by: int | None = Field(default=None)
+    updated_at: datetime
     password: str | None
