@@ -7,8 +7,7 @@ from user.base.model import UserBase
 
 
 class UserGetIn(UserBase):
-    username: str = Field(index=True, unique=True, nullable=False)
-    password: str = Field(nullable=False, min_length=6)
+    pass
 
 
 class UserOut(UserBase):
@@ -16,19 +15,19 @@ class UserOut(UserBase):
 
 
 class UserCreateIn(UserBase):
-    updated_at: datetime = None
-    created_at: datetime = None
+    updated_at: datetime | None = None
+    created_at: datetime | None = None
     password: str = Field(min_length=6)
 
     @field_validator("password")
-    def validate_password(cls, v):
-        if not re.search(r"\W", v):
+    def validate_password(cls, value: str):
+        if not re.search(r"\W", value):
             raise ValueError("Password must contain at least one special character")
-        if not re.search(r"[A-Z]", v):
+        if not re.search(r"[A-Z]", value):
             raise ValueError("Password must contain at least one uppercase letter")
 
-        ### TEMPORARY: implementation to hash password
-        hash_pwd = hashlib.sha512(v.encode()).hexdigest()
+        # TEMPORARY: implementation to hash password
+        hash_pwd = hashlib.sha512(value.encode()).hexdigest()
 
         return hash_pwd
 

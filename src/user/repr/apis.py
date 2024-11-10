@@ -16,6 +16,7 @@ async def get_user(
 ) -> UserOut:
     result = await user_repo.get_user_by_unique_key(id=user_id)
 
+    # TEMPORARY: refactor to only one response in the future
     return result or JSONResponse(status_code=404, content={"detail": "User not found"})
 
 
