@@ -11,7 +11,7 @@ class UserGetIn(UserBase):
 
 
 class UserOut(UserBase):
-    id: UUID4
+    id: dict[str, UUID4]
 
 
 class UserCreateIn(UserBase):

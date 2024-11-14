@@ -1,15 +1,12 @@
 from typing import Annotated
-from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, HTTPException, Cookie
+from fastapi.security import OAuth2PasswordRequestForm
 import jwt
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
 from common.dependencies import SessionDependency, SettingsDependency
 from user.repr.validations import UserCreateIn
-
-
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def get_user_repository(session: SessionDependency) -> UserRepository:
@@ -57,7 +54,8 @@ async def validate_email_exists(
 
 
 async def get_current_user(
-    token: Annotated[str, Depends(oauth2_scheme)],
+    *,
+    access_token: Annotated[str | None, Cookie()] = None,
     settings: SettingsDependency,
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ) -> UserEntity:
@@ -66,9 +64,13 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"},
     )
+
+    if access_token is None:
+        raise credentials_exception
+
     try:
         payload = jwt.decode(  # type: ignore
-            token,
+            access_token,
             settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm]
         )

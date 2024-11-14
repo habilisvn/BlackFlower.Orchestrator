@@ -49,7 +49,7 @@ async def get_access_token_v2(
     # Set HTTPOnly cookie
     response.set_cookie(
         key="access_token",
-        value=f"Bearer {access_token}",
+        value=access_token,
         httponly=True,
         secure=False,  # Only send cookie over HTTPS (if True)
         samesite="none",  # Temporarily disabled CSRF protection
