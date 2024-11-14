@@ -1,0 +1,5 @@
+- Kibana server internal error
+-> delete kibana pod
+
+- Logstash monitoring
+-> logstash is able to self monitor

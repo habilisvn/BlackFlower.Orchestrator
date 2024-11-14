@@ -1,0 +1,23 @@
+helm install kibana oci://registry-1.docker.io/bitnamicharts/kibana 
+helm upgrade kibana oci://registry-1.docker.io/bitnamicharts/kibana --set elasticsearch.hosts[0]=localhost,elasticsearch.port=9200
+kubectl port-forward svc/kibana 8080:5601
+
+helm install elasticsearch oci://registry-1.docker.io/bitnamicharts/elasticsearch
+kubectl port-forward svc/elasticsearch 9200:9200
+bin/elasticsearch-create-enrollment-token -s kibana
+
+-> elastic password: dnHqCJcM7hCpj8el
+
+1. Watch all cluster members come up.
+  $ kubectl get pods --namespace=default -l app=elasticsearch-master -w
+2. Retrieve elastic user's password.
+  $ kubectl get secrets --namespace=default elasticsearch-master-credentials -ojsonpath='{.data.password}' | base64 -d
+3. Test cluster health using Helm test.
+  $ helm --namespace=default test elasticsearch
+
+
+kubectl exec -it elasticsearch-master-0 -- /bin/sh
+
+kubectl apply -f ...
+
+kubectl rollout restart daemonset/filebeat
