@@ -1,4 +1,10 @@
 {
     "notebook.defaultFormatter": "ms-python.flake8",
-    "editor.defaultFormatter": "ms-python.flake8"
+    "editor.defaultFormatter": "ms-python.flake8",
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.autopep8"
+    },
+    "[yaml]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    }
 }

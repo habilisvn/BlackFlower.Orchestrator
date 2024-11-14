@@ -18,4 +18,7 @@ async def final_error_handler(request: Request, exc: DBAPIError):
 
 
 async def value_error_handler(request: Request, exc: IsExistentException):
-    return JSONResponse(status_code=400, content={"detail": str(exc).capitalize()})
+    return JSONResponse(
+        status_code=400,
+        content={"detail": str(exc).capitalize()}
+    )

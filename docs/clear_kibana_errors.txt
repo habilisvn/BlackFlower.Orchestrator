@@ -1,0 +1,7 @@
+kubectl delete pods --field-selector status.phase=Failed
+
+kubectl delete configmap kibana-kibana-helm-scripts
+kubectl delete serviceaccount pre-install-kibana-kibana
+kubectl delete roles pre-install-kibana-kibana
+kubectl delete rolebindings pre-install-kibana-kibana
+kubectl delete job pre-install-kibana-kibana
