@@ -13,7 +13,7 @@ from user.repr.dependencies import (
 from user.repr.validations import UserCreateIn, UserOut
 
 
-router = APIRouter(prefix="/users", tags=["user"])
+router = APIRouter(prefix="/v1/users", tags=["user"])
 
 
 @router.get("/{user_id}", response_model=UserOut)

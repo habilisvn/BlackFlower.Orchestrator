@@ -1,11 +1,13 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
+from pydantic import UUID4
+
 
 class BaseEntity:
     def __init__(
         self,
-        id: str | None = None,
+        id: UUID4 | None = None,
         created_at: datetime | None = None,
         updated_at: datetime | None = None,
     ):

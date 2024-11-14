@@ -1,0 +1,17 @@
+- Create a new migration:
+
+```bash
+alembic revision --autogenerate -m "init"
+```
+
+- Apply migrations:
+
+```bash
+alembic upgrade head
+```
+
+- Downgrade migrations:
+
+```bash
+alembic downgrade -1
+```

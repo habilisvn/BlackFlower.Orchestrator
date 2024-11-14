@@ -4,6 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     postgresql_url: str
+    postgresql_url_sync: str
     jwt_secret_key: str
     jwt_algorithm: str
     jwt_access_token_expire_minutes: int

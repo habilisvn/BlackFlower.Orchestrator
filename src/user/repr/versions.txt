@@ -1,0 +1,7 @@
+API v1:
+- [x] Token in body
+- [ ] Token in cookie
+
+API v2:
+- [x] Token in cookie
+- [ ] Token in body

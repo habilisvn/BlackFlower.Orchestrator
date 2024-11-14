@@ -8,11 +8,30 @@ from user.repr.dependencies import validate_user_exists
 from user.utils import create_access_token
 
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
+router_v1 = APIRouter(prefix="/v1/auth", tags=["auth"])
+router_v2 = APIRouter(prefix="/v2/auth", tags=["auth"])
 
 
-@router.post("/login")
-async def get_access_token(
+@router_v1.post("/login")
+async def get_access_token_v1(
+    settings: SettingsDependency,
+    user: Annotated[UserEntity, Depends(validate_user_exists)]
+) -> dict[str, str]:
+    access_token_expires = timedelta(
+        minutes=settings.jwt_access_token_expire_minutes
+    )
+    access_token = create_access_token(
+        data={"sub": user.username},
+        expires_delta=access_token_expires,
+        secret_key=settings.jwt_secret_key,
+        algorithm=settings.jwt_algorithm
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router_v2.post("/login")
+async def get_access_token_v2(
     response: Response,
     settings: SettingsDependency,
     user: Annotated[UserEntity, Depends(validate_user_exists)]
@@ -40,3 +59,7 @@ async def get_access_token(
     )
 
     return {"message": "Successfully logged in"}
+
+
+router.include_router(router_v1)
+router.include_router(router_v2)
