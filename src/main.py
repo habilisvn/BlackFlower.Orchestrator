@@ -9,7 +9,7 @@ import uvloop
 
 from common.exception_handlers import final_error_handler, value_error_handler
 from common.exceptions import IsExistentException
-from user.repr.api.user import router as user_router
+from user.router import router as user_router
 from config.session import create_db_and_tables
 
 
