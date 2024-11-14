@@ -1,6 +1,0 @@
-SQL migration files are managed by atlas
-
-Example command:
-```
-atlas schema inspect -u "" --format '{{ sql . }}' > sql/default.sql
-```

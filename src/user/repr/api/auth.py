@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import Depends, APIRouter
+from fastapi import Depends, APIRouter, Response
 from datetime import timedelta
 
 from common.dependencies import SettingsDependency
@@ -13,6 +13,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 
 @router.post("/login")
 async def get_access_token(
+    response: Response,
     settings: SettingsDependency,
     user: Annotated[UserEntity, Depends(validate_user_exists)]
 ) -> dict[str, str]:
@@ -25,4 +26,17 @@ async def get_access_token(
         secret_key=settings.jwt_secret_key,
         algorithm=settings.jwt_algorithm
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+
+    # Set HTTPOnly cookie
+    response.set_cookie(
+        key="access_token",
+        value=f"Bearer {access_token}",
+        httponly=True,
+        secure=False,  # Only send cookie over HTTPS (if True)
+        samesite="none",  # Temporarily disabled CSRF protection
+        # Convert minutes to seconds
+        max_age=settings.jwt_access_token_expire_minutes * 60,
+        path="/"  # Cookie available for all paths
+    )
+
+    return {"message": "Successfully logged in"}
