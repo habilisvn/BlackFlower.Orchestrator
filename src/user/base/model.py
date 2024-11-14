@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, EmailStr
-from sqlmodel import Field
+from sqlmodel import Field  # type: ignore
 
 
 class UserBase(BaseModel):

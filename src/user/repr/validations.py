@@ -1,6 +1,6 @@
 from datetime import datetime
 import re
-from pydantic import Field, field_validator
+from pydantic import UUID4, Field, field_validator
 import hashlib
 
 from user.base.model import UserBase
@@ -11,7 +11,7 @@ class UserGetIn(UserBase):
 
 
 class UserOut(UserBase):
-    id: int
+    id: UUID4
 
 
 class UserCreateIn(UserBase):

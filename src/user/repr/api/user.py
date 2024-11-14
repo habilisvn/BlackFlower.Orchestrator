@@ -1,10 +1,11 @@
 from typing import Annotated
-from uuid import UUID
 from fastapi import Depends, HTTPException, APIRouter
+from pydantic import UUID4
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
 from user.repr.dependencies import (
+    get_current_user,
     get_user_repository,
     validate_email_exists,
     validate_username_exists,
@@ -17,7 +18,7 @@ router = APIRouter(prefix="/users", tags=["user"])
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(
-    user_id: UUID,
+    user_id: UUID4,
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ) -> UserOut:
     result = await user_repo.find_by_id(entity_id=user_id)
@@ -26,7 +27,11 @@ async def get_user(
     return result  # type: ignore
 
 
-@router.post("/", response_model=UserOut)
+@router.post(
+    "/",
+    dependencies=[Depends(get_current_user)],
+    response_model=UserOut
+)
 async def create_user(
     user: UserCreateIn,
     username: Annotated[str, Depends(validate_username_exists)],

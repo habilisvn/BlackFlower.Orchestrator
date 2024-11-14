@@ -1,4 +1,4 @@
-from uuid import UUID
+from pydantic import UUID4
 from sqlmodel import select
 
 from common.repository import AbstractRepository
@@ -22,7 +22,7 @@ class UserRepository(AbstractRepository[UserEntity]):
 
         return user_db  # type: ignore
 
-    async def find_by_id(self, entity_id: UUID) -> UserEntity | None:
+    async def find_by_id(self, entity_id: UUID4) -> UserEntity | None:
         query = select(UserTable).where(UserTable.id == entity_id)
 
         async with self.session.begin():
@@ -53,7 +53,7 @@ class UserRepository(AbstractRepository[UserEntity]):
         return user  # type: ignore
 
     # not tested
-    async def delete(self, entity_id: UUID) -> None:
+    async def delete(self, entity_id: UUID4) -> None:
         query = select(UserTable).where(UserTable.id == entity_id)
 
         async with self.session.begin():

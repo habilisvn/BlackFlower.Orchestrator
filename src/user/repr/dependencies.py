@@ -1,11 +1,15 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+import jwt
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
-from common.dependencies import SessionDependency
+from common.dependencies import SessionDependency, SettingsDependency
 from user.repr.validations import UserCreateIn
+
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 
 async def get_user_repository(session: SessionDependency) -> UserRepository:
@@ -52,14 +56,29 @@ async def validate_email_exists(
     return user.email
 
 
-# async def validate_id_exists(
-#     user_id: str,
-#     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
-# ) -> str:
-#     check = await user_repo.find_by_id(user_id)
-#     if not check:
-#         raise HTTPException(
-#             status_code=404,
-#             detail="User not found"
-#         )
-#     return user_id
+async def get_current_user(
+    token: Annotated[str, Depends(oauth2_scheme)],
+    settings: SettingsDependency,
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+) -> UserEntity:
+    credentials_exception = HTTPException(
+        status_code=401,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(  # type: ignore
+            token,
+            settings.jwt_secret_key,
+            algorithms=[settings.jwt_algorithm]
+        )
+        username: str | None = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except jwt.InvalidTokenError:
+        raise credentials_exception
+
+    user = await user_repo.find_by_username(username)
+    if user is None:
+        raise credentials_exception
+    return user
