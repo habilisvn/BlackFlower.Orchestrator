@@ -11,8 +11,13 @@ class UserRepository(AbstractRepository[UserEntity]):
     def __init__(self, session: SessionDependency):
         self.session = session
 
-    async def save(self, entity: UserEntity) -> UserEntity:
-        user_db = UserTable(**entity.model_dump())
+    # DOCUMENT: Nested class as a return type
+    # The nested class is defined at the base class
+    async def save(
+        self, entity: UserEntity
+    ) -> 'UserRepository.WriteInfo[UserEntity]':
+        entity_dict = entity.model_dump()
+        user_db = UserTable(**entity_dict)
 
         # DOCUMENT: This syntax for nested session
         async with self.session.begin():
@@ -20,7 +25,10 @@ class UserRepository(AbstractRepository[UserEntity]):
 
         await self.session.refresh(user_db)
 
-        return user_db  # type: ignore
+        return UserRepository.WriteInfo(
+            entity=UserEntity.model_validate(user_db),
+            write_info={}
+        )
 
     async def find_by_id(self, entity_id: UUID4) -> UserEntity | None:
         query = select(UserTable).where(UserTable.id == entity_id)
@@ -51,6 +59,14 @@ class UserRepository(AbstractRepository[UserEntity]):
         user = result.scalars().first()
 
         return user  # type: ignore
+
+    async def find_all(self, limit: int, offset: int) -> list[UserEntity]:
+        query = select(UserTable).offset(offset).limit(limit)
+
+        async with self.session.begin():
+            result = await self.session.execute(query)
+
+        return result.scalars().all()  # type: ignore
 
     # not tested
     async def delete(self, entity_id: UUID4) -> None:

@@ -9,8 +9,25 @@ from common.exceptions import IsExistentException
 logger = logging.getLogger(__name__)
 
 
+async def get_request_data(request: Request):
+    """Helper function to read and return request data for logging."""
+    # Access the stored request body from the middleware
+    request_body = (request.state.body.decode("utf-8")
+                    if request.state.body else "<empty body>")
+
+    request_data = {
+        "method": request.method,
+        "url": str(request.url),
+        "headers": dict(request.headers),
+        "body": request_body,
+        "query_params": dict(request.query_params),
+    }
+    return request_data
+
+
 async def final_error_handler(request: Request, exc: DBAPIError):
-    logger.error(f"Final exception handler: {exc}")
+    request_data = await get_request_data(request)
+    logger.error(f"Exception: {exc}", extra={"request": request_data})
     return JSONResponse(
         status_code=503,
         content={"detail": "Service temporarily unavailable"},
