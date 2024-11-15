@@ -1,5 +1,4 @@
 from fastapi.responses import JSONResponse
-from sqlalchemy.exc import DBAPIError
 from fastapi import Request
 import logging
 
