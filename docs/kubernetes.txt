@@ -1,0 +1,5 @@
+- Create secret from .env file:
+kubectl create secret generic app-secret --from-env-file=kubernetes.env
+
+- Delete secret:
+kubectl delete secret app-secret

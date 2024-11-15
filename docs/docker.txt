@@ -1,0 +1,5 @@
+- In file .env, the host of database must be host.docker.internal (to connect to the host machine from the container).
+This configuration is supported by bridge network driver (see details in docker-compose.yml).
+
+- Command to build the image: docker build -t habilisv/fastapi:1.0 .
+- Command to run the container (for testing): docker-compose up
