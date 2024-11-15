@@ -45,7 +45,7 @@ jobs:
 
     - name: Run tests
       env:
-        DATABASE_URL: postgresql+asyncpg://postgres:postgres@localhost:5432/test_db
+        DATABASE_URL: postgresql+asyncpg://habilis:abcd1234@localhost:5432/deep_brain
         SECRET_KEY: test_secret_key
       run: |
         pytest --cov=src tests/ --cov-report=xml
