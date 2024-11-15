@@ -60,8 +60,8 @@ class UserRepository(AbstractRepository[UserEntity]):
 
         return user  # type: ignore
 
-    async def find_all(self) -> list[UserEntity]:
-        query = select(UserTable)
+    async def find_all(self, limit: int, offset: int) -> list[UserEntity]:
+        query = select(UserTable).offset(offset).limit(limit)
 
         async with self.session.begin():
             result = await self.session.execute(query)

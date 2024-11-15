@@ -27,10 +27,14 @@ async def get_users(
     page_size: Annotated[int, Query(ge=1, le=100)] = 10,
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ):
-    skip = (page - 1) * page_size
-    result = await user_repo.find_all()
+    offset = (page - 1) * page_size
+    result = await user_repo.find_all(
+        limit=page_size,
+        offset=offset
+    )
+
     return {
-        "data": result[skip:skip + page_size],
+        "data": result,
         "page": page,
         "page_size": page_size
     }

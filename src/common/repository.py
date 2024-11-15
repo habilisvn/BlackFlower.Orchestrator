@@ -17,7 +17,7 @@ class AbstractRepository[T](ABC):
         pass
 
     @abstractmethod
-    async def find_all(self) -> list[T]:
+    async def find_all(self, limit: int, offset: int) -> list[T]:
         """Find all entities."""
         pass
 
