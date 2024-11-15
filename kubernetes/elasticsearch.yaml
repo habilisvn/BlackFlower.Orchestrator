@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: elasticsearch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: elasticsearch
+  template:
+    metadata:
+      labels:
+        app: elasticsearch
+    spec:
+      containers:
+      - name: elasticsearch
+        image: docker.elastic.co/elasticsearch/elasticsearch:7.15.0  # Replace with the desired version
+        env:
+          - name: discovery.type
+            value: "single-node"  # Use single-node mode in Minikube for simplicity
+          - name: ES_JAVA_OPTS
+            value: "-Xms512m -Xmx512m"  # Adjust memory limits for Minikube
+          - name: ELASTIC_PASSWORD
+            value: "abcd1234"  # Set a password for the Elasticsearch user
+          # - name: xpack.security.enabled  # Added security setting
+          #   value: "true"
+        ports:
+          - containerPort: 9200
+          - containerPort: 9300
+        volumeMounts:
+          - name: elasticsearch-storage
+            mountPath: /usr/share/elasticsearch/data
+      volumes:
+        - name: elasticsearch-storage
+          emptyDir: {}  # Replace with a PersistentVolume in production
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: elasticsearch
+spec:
+  type: ClusterIP
+  selector:
+    app: elasticsearch
+  ports:
+    - protocol: TCP
+      port: 9200
+      targetPort: 9200
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-config
+data:
+  elasticsearch.yml: |-
+    monitoring.enabled: true
