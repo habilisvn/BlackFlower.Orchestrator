@@ -25,8 +25,9 @@ async def get_request_data(request: Request):
     return request_data
 
 
-async def final_error_handler(request: Request, exc: DBAPIError):
+async def final_error_handler(request: Request, exc: Exception):
     request_data = await get_request_data(request)
+
     logger.error(f"Exception: {exc}", extra={"request": request_data})
     return JSONResponse(
         status_code=503,

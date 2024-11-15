@@ -2,19 +2,19 @@ import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 import os
-from typing import Any, Awaitable, Callable
-from fastapi import FastAPI, Request, Response
+from typing import Any
+from fastapi import FastAPI
 import logging
 import json
 import uvloop
 from uvicorn.logging import ColourizedFormatter
-from starlette.middleware.base import BaseHTTPMiddleware
 
 from common.exception_handlers import (
     final_error_handler,
     value_error_handler,
 )
 from common.exceptions import IsExistentException
+from common.middlewares import StoreRequestBodyMiddleware
 from user.router import router as user_router
 from config.session import create_db_and_tables
 
@@ -87,15 +87,24 @@ logging.config.dictConfig(  # type: ignore
             "console": {
                 "class": "logging.StreamHandler",
                 "formatter": "json",
-                "level": "INFO",
+                "level": "ERROR",
             },
+            "kafka": {
+                "class": "common.error_handlers.KafkaHandler",
+                "level": "ERROR",
+                "kafka_config": {
+                    "bootstrap.servers": "kafka:9092"
+                },
+                "topic": "fastapi-logs"
+            }
         },
         "root": {
             "level": "INFO",
             "handlers": [
                 "file",
                 "console",
-            ],  # Both file and console handlers for root logger
+                "kafka"
+            ],  # File, console and kafka handlers for root logger
         },
         "loggers": {
             "sqlalchemy.engine": {
@@ -103,7 +112,7 @@ logging.config.dictConfig(  # type: ignore
                 "propagate": False,  # Allow logs to propagate to root
             },
             "fastapi.error_logger": {
-                "handlers": ["file"],
+                "handlers": ["file", "kafka"],
                 "level": "ERROR",
                 "propagate": False,
             },
@@ -131,22 +140,5 @@ app.add_exception_handler(
 app.add_exception_handler(Exception, final_error_handler)  # type: ignore
 
 
-# TEMPORARY: Remove this after
-class StoreRequestBodyMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]]
-    ):
-        # Read the body as bytes
-        request_body = await request.body()
-
-        # Store the body in request.state
-        request.state.body = request_body  # Save the raw body for the handler
-
-        # Call the next handler in the middleware chain
-        response = await call_next(request)
-        return response
-
-
+# DOCUMENT: Add middleware to store the request body
 app.add_middleware(StoreRequestBodyMiddleware)

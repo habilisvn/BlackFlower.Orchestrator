@@ -3,3 +3,6 @@ kubectl create secret generic app-secret --from-env-file=kubernetes.env
 
 - Delete secret:
 kubectl delete secret app-secret
+
+- Kafa configurations:
++ Must set 127.0.0.1 kafka in /etc/hosts to make it work
