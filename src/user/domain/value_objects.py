@@ -1,12 +1,13 @@
 from dataclasses import dataclass
-from enum import Enum
 import re
+
 
 @dataclass(frozen=True)
 class Email:
     address: str
 
-    _email_pattern = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")  # Basic email regex
+    # Basic email regex
+    _email_pattern = re.compile(r"^[\w\.-]+@[\w\.-]+\.\w+$")
 
     def __post_init__(self):
         # Validate email format

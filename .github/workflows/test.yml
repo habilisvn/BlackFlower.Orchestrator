@@ -13,9 +13,9 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: postgres
-          POSTGRES_DB: test_db
+          POSTGRES_USER: habilis
+          POSTGRES_PASSWORD: abcd1234
+          POSTGRES_DB: deep_brain
         ports:
           - 5432:5432
         options: >-
