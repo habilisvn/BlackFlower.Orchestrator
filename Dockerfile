@@ -12,7 +12,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 # Copy application code
 COPY ./src /code/src
-COPY docker.env /code/src/.env
+COPY .env.docker /code/src/.env
 
 # Expose port 8000
 EXPOSE 8000
