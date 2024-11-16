@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from config.settings import Settings, get_settings as get_settings_config
 
 settings = get_settings_config()
-engine = create_async_engine(settings.postgresql_url, echo=False)
+engine = create_async_engine(settings.postgresql_url_sync, echo=False)
 
 
 async def get_session():

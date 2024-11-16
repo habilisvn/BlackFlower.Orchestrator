@@ -1,9 +1,11 @@
 from datetime import datetime
+from uuid import UUID
 
-from pydantic import BaseModel
+from common.base import BaseEntity
 
 
-class UserEntity(BaseModel):
+class UserEntity(BaseEntity):
+    id: UUID | None = None
     email: str
     username: str
     is_active: bool = True
@@ -27,3 +29,4 @@ class UserEntity(BaseModel):
     def activate(self):
         self.is_active = True
         self.updated_at = datetime.now()
+

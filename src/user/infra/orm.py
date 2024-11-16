@@ -3,7 +3,7 @@ from sqlalchemy.orm import mapped_column, Mapped
 from uuid import uuid4
 from sqlalchemy import UUID
 
-from common.alchemy import Base
+from common.base import Base
 
 
 class UserTable(Base):

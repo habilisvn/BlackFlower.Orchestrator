@@ -1,4 +1,7 @@
+from typing import Any
+from fastapi.encoders import jsonable_encoder
 from pydantic import UUID4
+from sqlalchemy import UUID
 from sqlmodel import select
 
 from common.repository import AbstractRepository
@@ -15,7 +18,7 @@ class UserRepository(AbstractRepository[UserEntity]):
     # The nested class is defined at the base class
     async def save(
         self, entity: UserEntity
-    ) -> 'UserRepository.WriteInfo[UserEntity]':
+    ) -> UserEntity:
         entity_dict = entity.model_dump()
         user_db = UserTable(**entity_dict)
 
@@ -25,10 +28,8 @@ class UserRepository(AbstractRepository[UserEntity]):
 
         await self.session.refresh(user_db)
 
-        return UserRepository.WriteInfo(
-            entity=UserEntity.model_validate(user_db),
-            write_info={}
-        )
+        # DOCUMENT: Must use jsonable_encoder to prevent async exception
+        return UserEntity.model_validate(user_db)
 
     async def find_by_id(self, entity_id: UUID4) -> UserEntity | None:
         query = select(UserTable).where(UserTable.id == entity_id)

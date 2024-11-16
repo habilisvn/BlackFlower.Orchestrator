@@ -5,7 +5,7 @@ from sqlalchemy import pool
 from alembic import context  # type: ignore
 
 from config.settings import get_settings
-from common.alchemy import Base
+from common.base import Base
 
 # DOCUMENT: don't remove this import
 from user.infra.orm import UserTable  # type: ignore # noqa # pylint: disable=unused-import

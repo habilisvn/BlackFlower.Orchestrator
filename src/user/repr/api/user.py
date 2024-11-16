@@ -4,6 +4,7 @@ from pydantic import UUID4
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
+from user.infra.services.notify import notify_user_created
 from user.repr.dependencies import (
     get_current_user,
     get_user_repository,
@@ -62,10 +63,16 @@ async def create_user(
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ):
     # Prepare the user entity
-    user_dict = user.model_dump()
-    user_dict.update({"username": username, "email": email})
-    user_entity = UserEntity(**user_dict)
+    user.username = username
+    user.email = email
+    # user_dict = user.model_dump()
+    # user_dict.update({"username": username, "email": email})
+    user_entity = UserEntity.model_validate(user)
 
-    # Save the user entity
-    result = await user_repo.save(user_entity)
-    return result
+    # Save the user entity and get the new user entity
+    user_entity = await user_repo.save(user_entity)
+
+    # Send the user created event
+    await notify_user_created(user_entity)
+
+    return user_entity
