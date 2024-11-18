@@ -8,6 +8,7 @@ import logging
 import json
 import uvloop
 from uvicorn.logging import ColourizedFormatter
+from fastapi.middleware.cors import CORSMiddleware
 
 from common.exception_handlers import (
     final_error_handler,
@@ -142,3 +143,11 @@ app.add_exception_handler(Exception, final_error_handler)  # type: ignore
 
 # DOCUMENT: Add middleware to store the request body
 app.add_middleware(StoreRequestBodyMiddleware)
+
+# DOCUMENT: Add middleware to add CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
