@@ -53,7 +53,7 @@ class CustomJsonFormatter(ColourizedFormatter):
             msg=f"Message: {json.dumps(new_msg)}",
             args=record.args,
             exc_info=record.exc_info,
-            func=record.funcName
+            func=record.funcName,
         )
 
         return super().format(new_record)
@@ -68,15 +68,13 @@ logging.config.dictConfig(  # type: ignore
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "format": (
-                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                ),
+                "format": ("%(asctime)s - %(name)s - %(levelname)s - %(message)s"),
             },
             "json": {
                 "()": CustomJsonFormatter,
                 "use_colors": True,
                 "fmt": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            }
+            },
         },
         "handlers": {
             "file": {
@@ -93,18 +91,16 @@ logging.config.dictConfig(  # type: ignore
             "kafka": {
                 "class": "common.error_handlers.KafkaHandler",
                 "level": "ERROR",
-                "kafka_config": {
-                    "bootstrap.servers": "kafka:9092"
-                },
-                "topic": "fastapi-logs"
-            }
+                "kafka_config": {"bootstrap.servers": "kafka:9092"},
+                "topic": "fastapi-logs",
+            },
         },
         "root": {
             "level": "INFO",
             "handlers": [
                 "file",
                 "console",
-                "kafka"
+                "kafka",
             ],  # File, console and kafka handlers for root logger
         },
         "loggers": {
@@ -136,7 +132,8 @@ app = FastAPI(lifespan=lifespan)
 app.include_router(user_router)
 
 app.add_exception_handler(
-    IsExistentException, value_error_handler  # type: ignore
+    IsExistentException,
+    value_error_handler,  # type: ignore
 )
 app.add_exception_handler(Exception, final_error_handler)  # type: ignore
 
