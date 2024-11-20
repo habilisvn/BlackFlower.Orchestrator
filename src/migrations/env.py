@@ -8,7 +8,7 @@ from config.settings import get_settings
 from common.base import Base
 
 # DOCUMENT: don't remove this import
-from user.infra.orm import UserTable  # type: ignore # noqa # pylint: disable=unused-import
+from user.infra.orm import User  # type: ignore # noqa # pylint: disable=unused-import
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

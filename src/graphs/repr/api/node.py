@@ -2,11 +2,11 @@ from typing import Annotated
 from fastapi import Depends, HTTPException, APIRouter, Query
 from pydantic import UUID4
 
-from nodes.infra.repository import NodeRepository
-from nodes.repr.dependencies import (
+from graphs.infra.repository import NodeRepository
+from graphs.repr.dependencies import (
     get_node_repository,
 )
-from nodes.repr.validations import NodeOut
+from graphs.repr.validations import NodeOut, NodeCreate
 from user.repr.dependencies import get_current_user
 
 
@@ -36,4 +36,13 @@ async def get_node(
     result = await node_repo.find_by_id(entity_id=node_id)
     if not result:
         raise HTTPException(status_code=404, detail="Node not found")
+    return result
+
+
+@router.post("", response_model=NodeOut, status_code=201)
+async def create_node(
+    node: NodeCreate,
+    node_repo: Annotated[NodeRepository, Depends(get_node_repository)]
+):
+    result = await node_repo.create(node)
     return result

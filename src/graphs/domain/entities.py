@@ -4,7 +4,7 @@ from uuid import UUID
 from common.base import BaseEntity
 
 
-class UserEntity(BaseEntity):
+class NodeEntity(BaseEntity):
     id: UUID | None = None
     email: str
     username: str
