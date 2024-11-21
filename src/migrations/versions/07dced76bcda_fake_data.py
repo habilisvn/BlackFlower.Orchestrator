@@ -39,7 +39,7 @@ def upgrade() -> None:
 
     # Insert in batches of 1000 to avoid memory issues
     batch_size = 1000
-    total_users = 10_000_000
+    total_users = 10_000
 
     for i in range(0, total_users, batch_size):
         batch = [

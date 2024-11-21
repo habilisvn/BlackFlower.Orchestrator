@@ -33,7 +33,7 @@ async def get_mongodb() -> AsyncIOMotorDatabase[Any]:
         mongo_client.close()
 
 
-MongoDBDependency = Annotated[AsyncIOMotorDatabase[T], Depends(get_mongodb)]
+MongoDBDependency = Annotated[AsyncIOMotorDatabase, Depends(get_mongodb)]
 
 
 # Settings dependency

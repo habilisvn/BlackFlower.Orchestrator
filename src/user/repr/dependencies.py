@@ -5,11 +5,11 @@ import jwt
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
-from common.dependencies import SessionDependency, SettingsDependency
+from common.dependencies import PostgresDependency, SettingsDependency
 from user.repr.validations import UserCreateIn
 
 
-async def get_user_repository(session: SessionDependency) -> UserRepository:
+async def get_user_repository(session: PostgresDependency) -> UserRepository:
     return UserRepository(session)
 
 
