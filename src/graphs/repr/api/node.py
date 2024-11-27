@@ -1,12 +1,13 @@
 from typing import Annotated
 from fastapi import Depends, HTTPException, APIRouter, Query
-from pydantic import UUID4
 
+from graphs.domain import Label, NodeEntity
 from graphs.infra.repository import NodeRepository
 from graphs.repr.dependencies import (
     get_node_repository,
+    validate_label_exists,
 )
-from graphs.repr.validations import NodeOut, NodeCreate
+from graphs.repr.validations import NodeOut, NodeCreateIn
 from user.repr.dependencies import get_current_user
 
 
@@ -28,21 +29,26 @@ async def get_nodes(
     return {"data": result, "page": page, "page_size": page_size}
 
 
-@router.get("/{node_id}", response_model=NodeOut)
+@router.get("/{label}", response_model=NodeOut)
 async def get_node(
-    node_id: UUID4,
-    node_repo: Annotated[NodeRepository, Depends(get_node_repository)]
+    label: Label, node_repo: Annotated[NodeRepository, Depends(get_node_repository)]
 ):
-    result = await node_repo.find_by_id(entity_id=node_id)
+    result = await node_repo.find_by_primary_key(label=label)
     if not result:
         raise HTTPException(status_code=404, detail="Node not found")
     return result
 
 
-@router.post("", response_model=NodeOut, status_code=201)
+@router.post(
+    "",
+    status_code=201,
+    dependencies=[Depends(validate_label_exists)],
+)
 async def create_node(
-    node: NodeCreate,
-    node_repo: Annotated[NodeRepository, Depends(get_node_repository)]
-):
-    result = await node_repo.create(node)
-    return result
+    node: NodeCreateIn,
+    node_repo: Annotated[NodeRepository, Depends(get_node_repository)],
+) -> dict[str, str]:
+    node_entity = NodeEntity.model_validate(node)
+    await node_repo.save(node_entity)
+
+    return {"message": "Node created successfully"}

@@ -1,3 +1,4 @@
+from mongoengine.document import Document
 from sqlalchemy.orm import DeclarativeBase, mapped_column, Mapped
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from typing import Any
@@ -23,3 +24,14 @@ class BaseEntity(BaseModel):
         if isinstance(_input, Base) or isinstance(_input, BaseModel):
             return jsonable_encoder(_input)
         return _input
+
+
+class BaseDocument(Document):
+    meta = {"abstract": True}
+
+    created_by: Mapped[int | None]
+    created_at: Mapped[datetime] = mapped_column(insert_default=datetime.now)
+    updated_by: Mapped[int | None]
+    updated_at: Mapped[datetime] = mapped_column(
+        insert_default=datetime.now, onupdate=datetime.now
+    )

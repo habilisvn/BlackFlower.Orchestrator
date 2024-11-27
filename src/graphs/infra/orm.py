@@ -1,7 +1,12 @@
-# from uuid import uuid4
-from mongoengine import Document, StringField
+from mongoengine import StringField, ReferenceField
+
+from common.base import BaseDocument
 
 
-class Node(Document):
-    # id = StringField(primary_key=True, default=lambda: str(uuid4()))
+class Node(BaseDocument):
     label = StringField(unique=True, required=True)
+
+
+class Relation(BaseDocument):
+    from_node = ReferenceField(Node, required=True)
+    to_node = ReferenceField(Node, required=True)

@@ -2,7 +2,7 @@ from typing import Annotated
 from fastapi import Depends, APIRouter, Response
 from datetime import timedelta
 
-from common.dependencies import SettingsDependency
+from common.dependencies import SettingsDpd
 from user.domain.entities import UserEntity
 from user.repr.dependencies import validate_user_exists
 from user.utils import create_access_token
@@ -15,7 +15,7 @@ router_v2 = APIRouter(prefix="/v2/auth", tags=["auth"])
 
 @router_v1.post("/login")
 async def get_access_token_v1(
-    settings: SettingsDependency,
+    settings: SettingsDpd,
     user: Annotated[UserEntity, Depends(validate_user_exists)]
 ) -> dict[str, str]:
     access_token_expires = timedelta(
@@ -33,7 +33,7 @@ async def get_access_token_v1(
 @router_v2.post("/login")
 async def get_access_token_v2(
     response: Response,
-    settings: SettingsDependency,
+    settings: SettingsDpd,
     user: Annotated[UserEntity, Depends(validate_user_exists)]
 ) -> dict[str, str]:
     access_token_expires = timedelta(

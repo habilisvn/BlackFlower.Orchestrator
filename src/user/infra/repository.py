@@ -4,11 +4,11 @@ from sqlmodel import select
 from common.repository import AbstractRepository
 from user.domain.entities import UserEntity
 from user.infra.orm import User
-from common.dependencies import PostgresDependency
+from common.dependencies import PostgresDpd
 
 
 class UserRepository(AbstractRepository[UserEntity]):
-    def __init__(self, session: PostgresDependency):
+    def __init__(self, session: PostgresDpd):
         self.session = session
 
     # DOCUMENT: Nested class as a return type

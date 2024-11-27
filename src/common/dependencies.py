@@ -1,4 +1,5 @@
-from typing import Annotated, Any
+from collections.abc import AsyncGenerator
+from typing import Annotated
 from fastapi import Depends
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -19,21 +20,30 @@ async def get_postgres_session():
         yield session
 
 
-PostgresDependency = Annotated[AsyncSession, Depends(get_postgres_session)]
+PostgresDpd = Annotated[AsyncSession, Depends(get_postgres_session)]
 
-# MongoDB setup
-mongo_client = AsyncIOMotorClient(settings.mongodb_url)  # type: ignore
-mongo_db = mongo_client[settings.mongodb_database]  # type: ignore
+async def get_mongodb() -> AsyncGenerator[AsyncIOMotorDatabase, None]:
+    # MongoDB setup
+    mongo_client = AsyncIOMotorClient(settings.mongo_url)
+
+    async with await mongo_client.start_session(
+        {
+            "retryWrites": True,
+            "causalConsistency": True,
+        }
+    ) as session:
+        db = session.client[settings.mongo_db_name]
+        yield db
+
+MongoDBDpd = Annotated[AsyncIOMotorDatabase, Depends(get_mongodb)]
 
 
-async def get_mongodb() -> AsyncIOMotorDatabase[Any]:
-    try:
-        yield mongo_client
-    finally:
-        mongo_client.close()
+async def get_mongo_db_name() -> str:
+    return settings.mongo_db_name
 
 
-MongoDBDependency = Annotated[AsyncIOMotorDatabase, Depends(get_mongodb)]
+MongoDBNameDpd = Annotated[str, Depends(get_mongo_db_name)]
+
 
 
 # Settings dependency
@@ -41,4 +51,4 @@ async def get_settings():
     return get_settings_config()
 
 
-SettingsDependency = Annotated[Settings, Depends(get_settings)]
+SettingsDpd = Annotated[Settings, Depends(get_settings)]

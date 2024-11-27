@@ -17,6 +17,7 @@ from common.exception_handlers import (
 from common.exceptions import IsExistentException
 from common.middlewares import StoreRequestBodyMiddleware
 from user.router import router as user_router
+from graphs.router import router as graph_router
 from config.session import create_db_and_tables
 
 
@@ -91,7 +92,10 @@ logging.config.dictConfig(  # type: ignore
             "kafka": {
                 "class": "common.error_handlers.KafkaHandler",
                 "level": "ERROR",
-                "kafka_config": {"bootstrap.servers": "kafka:9092"},
+                # TODO: Get the kafka server from .env file (future feature)
+                # DOCUMENT: if cannot connect to kafka, add "kafka" to the client's /etc/hosts file
+                # the detail check at docs/common_kuber_errors.txt
+                "kafka_config": {"bootstrap.servers": "localhost:9092"},
                 "topic": "fastapi-logs",
             },
         },
@@ -120,7 +124,7 @@ logging.config.dictConfig(  # type: ignore
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_db_and_tables()
+    # await create_db_and_tables()
 
     yield
 
@@ -128,8 +132,9 @@ async def lifespan(app: FastAPI):
 # DOCUMENT: Set uvloop as the default event loop policy
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, responses={404: {"description": "Not found"}})
 app.include_router(user_router)
+app.include_router(graph_router)
 
 app.add_exception_handler(
     IsExistentException,

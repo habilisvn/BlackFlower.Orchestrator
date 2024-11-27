@@ -1,5 +1,9 @@
-- Kibana server internal error
+#1: Kibana server internal error
 -> delete kibana pod
 
-- Logstash monitoring
+#2: Logstash monitoring
 -> logstash is able to self monitor
+
+#3: Kafka advertised host
+-> The brokers advertise themselves using advertised.listeners, abstracted as KAFKA_ADVERTISED_HOST_NAME in the Docker image. Clients will connect to these advertised hosts and ports.
+Ensure the client can resolve and access these advertised hostnames, such as by adding "kafka" to the client's /etc/hosts file.
