@@ -1,6 +1,6 @@
 import json
-
 import aio_pika
+
 from user.domain.entities import UserEntity
 
 

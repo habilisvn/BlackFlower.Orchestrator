@@ -18,7 +18,6 @@ from common.exceptions import IsExistentException
 from common.middlewares import StoreRequestBodyMiddleware
 from user.router import router as user_router
 from graphs.router import router as graph_router
-from config.session import create_db_and_tables
 
 
 log_folder = "logs"

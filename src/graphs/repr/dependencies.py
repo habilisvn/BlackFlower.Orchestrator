@@ -10,7 +10,9 @@ async def get_node_repository(db: MongoDBDpd) -> NodeRepository:
     return NodeRepository(db)
 
 
-async def get_relationship_repository(db: MongoDBDpd) -> RelationshipRepository:
+async def get_relationship_repository(
+    db: MongoDBDpd
+) -> RelationshipRepository:
     return RelationshipRepository(db)
 
 

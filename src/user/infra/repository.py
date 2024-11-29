@@ -28,7 +28,7 @@ class UserRepository(AbstractRepository[UserEntity]):
         # DOCUMENT: Must use jsonable_encoder to prevent async exception
         return UserEntity.model_validate(user_db)
 
-    async def find_by_id(self, entity_id: UUID4) -> UserEntity | None:
+    async def find_by_primary_key(self, entity_id: UUID4) -> UserEntity | None:
         query = select(User).where(User.id == entity_id)
 
         async with self.session.begin():
