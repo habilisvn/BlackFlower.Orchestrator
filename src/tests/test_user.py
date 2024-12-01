@@ -1,19 +1,34 @@
 import pytest
 from fastapi.testclient import TestClient
+import datetime
 
 from src.common.base import Base
-from src.common.dependencies import get_pg_engine
+from src.common.dependencies import get_pg_sync_engine
 from src.main import app
+from sqlalchemy.orm import Session
+from src.user.infra.orm import User
 
 
 @pytest.fixture(autouse=True)
-async def setup():
+def setup():
     # Create async PostgreSQL database for testing
-    engine = get_pg_engine("test_db")
+    engine = get_pg_sync_engine("test_db")
+    Base.metadata.create_all(bind=engine)
 
     # Create all tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    with Session(engine) as session:
+        # Create admin user directly in database
+        admin = User(
+            username="admin",
+            email="admin@example.com",
+            password="admin",
+            full_name="Admin User",
+            created_at=datetime.datetime.now(datetime.UTC),
+            updated_at=datetime.datetime.now(datetime.UTC),
+        )
+
+        session.add(admin)
+        session.commit()
 
     client = TestClient(app)
 
@@ -22,27 +37,46 @@ async def setup():
 
 
 def test_create_user(client: TestClient):
+    # Login first
+    login_response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin", "password": "admin"},
+    )
+    assert login_response.status_code == 200
+    client.cookies = login_response.cookies
+
     response = client.post(
-        "/users/",
+        "/api/v1/users/",
         json={
-            "email": "test@example.com",
+            "username": "testuser1",
+            "email": "user1@example.com",
             "password": "testpassword123",
             "full_name": "Test User",
         },
     )
     assert response.status_code == 201
     data = response.json()
-    assert data["email"] == "test@example.com"
+    assert data["email"] == "user1@example.com"
+    assert data["username"] == "testuser1"
     assert data["full_name"] == "Test User"
     assert "id" in data
 
 
 def test_create_duplicate_user(client: TestClient):
+    # Login first
+    login_response = client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin", "password": "admin"},
+    )
+    assert login_response.status_code == 200
+    client.cookies = login_response.cookies
+
     # Create first user
     client.post(
-        "/users/",
+        "/api/v1/users/",
         json={
-            "email": "test@example.com",
+            "username": "testuser2",
+            "email": "user2@example.com",
             "password": "testpassword123",
             "full_name": "Test User",
         },
@@ -50,9 +84,10 @@ def test_create_duplicate_user(client: TestClient):
 
     # Try to create duplicate user
     response = client.post(
-        "/users/",
+        "/api/v1/users/",
         json={
-            "email": "test@example.com",
+            "username": "testuser2",
+            "email": "user2@example.com",
             "password": "testpassword123",
             "full_name": "Test User",
         },
@@ -61,11 +96,20 @@ def test_create_duplicate_user(client: TestClient):
 
 
 def test_login_user(client: TestClient):
+    # Login as admin first
+    admin_login = client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin", "password": "admin"},
+    )
+    assert admin_login.status_code == 200
+    client.cookies = admin_login.cookies
+
     # Create user first
     client.post(
-        "/users/",
+        "/api/v1/users/",
         json={
-            "email": "test@example.com",
+            "username": "testuser3",
+            "email": "user3@example.com",
             "password": "testpassword123",
             "full_name": "Test User",
         },
@@ -73,9 +117,9 @@ def test_login_user(client: TestClient):
 
     # Test login
     response = client.post(
-        "/auth/token",
+        "/api/v1/auth/token",
         data={
-            "username": "test@example.com",
+            "username": "testuser3",
             "password": "testpassword123",
         },
     )
@@ -87,9 +131,9 @@ def test_login_user(client: TestClient):
 
 def test_login_invalid_credentials(client: TestClient):
     response = client.post(
-        "/auth/token",
+        "/api/v1/auth/token",
         data={
-            "username": "wrong@example.com",
+            "username": "wronguser",
             "password": "wrongpassword",
         },
     )
@@ -97,37 +141,46 @@ def test_login_invalid_credentials(client: TestClient):
 
 
 def test_get_current_user(client: TestClient):
+    # Login as admin first
+    admin_login = client.post(
+        "/api/v1/auth/login",
+        data={"username": "admin", "password": "admin"},
+    )
+    assert admin_login.status_code == 200
+    client.cookies = admin_login.cookies
+
     # Create and login user
-    client.post(
-        "/users/",
+    create_response = client.post(
+        "/api/v1/users/",
         json={
-            "email": "test@example.com",
+            "username": "testuser4",
+            "email": "user4@example.com",
             "password": "testpassword123",
             "full_name": "Test User",
         },
     )
+    user_id = create_response.json()["id"]
 
+    # Login to get cookie
     login_response = client.post(
-        "/auth/token",
-        data={
-            "username": "test@example.com",
-            "password": "testpassword123",
-        },
+        "/api/v1/auth/login",
+        data={"username": "testuser4", "password": "testpassword123"},
     )
-    token = login_response.json()["access_token"]
+    assert login_response.status_code == 200
+    client.cookies = login_response.cookies
 
-    # Test get current user
+    # Get user by ID using cookie from login
     response = client.get(
-        "/users/me", headers={"Authorization": f"Bearer {token}"}
+        f"/api/v1/users/{user_id}",  # Use the httponly cookie set during login
     )
     assert response.status_code == 200
     data = response.json()
-    assert data["email"] == "test@example.com"
+    assert data["email"] == "user4@example.com"
     assert data["full_name"] == "Test User"
 
 
 def test_get_current_user_invalid_token(client: TestClient):
     response = client.get(
-        "/users/me", headers={"Authorization": "Bearer invalid_token"}
+        "/api/v1/users/me", headers={"Authorization": "Bearer invalid_token"}
     )
     assert response.status_code == 401

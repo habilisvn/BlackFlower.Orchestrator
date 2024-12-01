@@ -46,7 +46,7 @@ async def get_user(
     user_id: UUID4,
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ):
-    result = await user_repo.find_by_id(entity_id=user_id)
+    result = await user_repo.find_by_primary_key(entity_id=user_id)
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     return result

@@ -5,6 +5,7 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
 from sqlalchemy.ext.asyncio import create_async_engine
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from sqlalchemy import create_engine
 
 from config.settings import Settings, get_settings as get_settings_config
 
@@ -12,9 +13,22 @@ from config.settings import Settings, get_settings as get_settings_config
 settings = get_settings_config()
 
 
+def get_pg_sync_engine(db_name: str | None = None):
+    connection_string = (
+        f"{settings.postgresql_prefix_sync}://"
+        f"{settings.postgresql_username}:"
+        f"{settings.postgresql_password}@"
+        f"{settings.postgresql_host}:"
+        f"{settings.postgresql_port}/"
+        f"{db_name if db_name else settings.postgresql_db_name}"
+    )
+    print(connection_string)
+    return create_engine(connection_string, echo=False)
+
+
 # Postgres setup
 @lru_cache
-def get_pg_engine(db_name: str | None = None):
+def get_pg_async_engine(db_name: str | None = None):
     connection_string = (
         f"{settings.postgresql_prefix_async}://"
         f"{settings.postgresql_username}:"
@@ -27,12 +41,13 @@ def get_pg_engine(db_name: str | None = None):
 
 
 async def get_postgres_session(db_name: str | None = None):
-    pg_engine = get_pg_engine(db_name)
+    pg_engine = get_pg_async_engine(db_name)
     session_maker = async_sessionmaker[AsyncSession](
         pg_engine, expire_on_commit=False
     )
     async with session_maker() as session:
         yield session
+
 
 PostgresDpd = Annotated[AsyncSession, Depends(get_postgres_session)]
 
