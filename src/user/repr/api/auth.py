@@ -13,7 +13,7 @@ router_v1 = APIRouter(prefix="/v1/auth", tags=["auth"])
 router_v2 = APIRouter(prefix="/v2/auth", tags=["auth"])
 
 
-@router_v1.post("/login")
+@router_v2.post("/login")
 async def get_access_token_v1(
     settings: SettingsDpd,
     user: Annotated[UserEntity, Depends(validate_user_exists)],
@@ -30,7 +30,7 @@ async def get_access_token_v1(
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-@router_v2.post("/login")
+@router_v1.post("/login")
 async def get_access_token_v2(
     response: Response,
     settings: SettingsDpd,

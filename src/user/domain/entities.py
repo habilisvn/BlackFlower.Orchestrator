@@ -8,6 +8,7 @@ class UserEntity(BaseEntity):
     id: UUID | None = None
     email: str
     username: str
+    full_name: str | None = None
     is_active: bool = True
     is_superuser: bool = False
     created_by: int | None

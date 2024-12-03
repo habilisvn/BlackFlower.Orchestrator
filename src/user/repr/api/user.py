@@ -54,7 +54,8 @@ async def get_user(
 
 @router.post(
     "",
-    response_model=UserOut
+    response_model=UserOut,
+    status_code=201
 )
 async def create_user(
     user: UserCreateIn,
@@ -65,8 +66,7 @@ async def create_user(
     # Prepare the user entity
     user.username = username
     user.email = email
-    # user_dict = user.model_dump()
-    # user_dict.update({"username": username, "email": email})
+
     user_entity = UserEntity.model_validate(user)
 
     # Save the user entity and get the new user entity
@@ -76,3 +76,11 @@ async def create_user(
     await notify_user_created(user_entity)
 
     return user_entity
+
+
+@router.delete("/{user_id}", status_code=204)
+async def delete_user(
+    user_id: UUID4,
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+):
+    await user_repo.delete(entity_id=user_id)

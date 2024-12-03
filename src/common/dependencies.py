@@ -22,7 +22,6 @@ def get_pg_sync_engine(db_name: str | None = None):
         f"{settings.postgresql_port}/"
         f"{db_name if db_name else settings.postgresql_db_name}"
     )
-    print(connection_string)
     return create_engine(connection_string, echo=False)
 
 

@@ -16,7 +16,14 @@ config = context.config  # type: ignore
 
 settings = get_settings()
 config.set_main_option(  # type: ignore
-    "sqlalchemy.url", settings.postgresql_url_sync)
+    "sqlalchemy.url",
+    f"{settings.postgresql_prefix_async}://"
+    f"{settings.postgresql_username}:"
+    f"{settings.postgresql_password}@"
+    f"{settings.postgresql_host}:"
+    f"{settings.postgresql_port}/"
+    f"{settings.postgresql_db_name}",
+)
 
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
@@ -60,9 +67,11 @@ def run_migrations_offline() -> None:
 
 
 def do_run_migrations(connection):
+    print(f"Metadata: {target_metadata}")
     context.configure(connection=connection, target_metadata=target_metadata)
 
     with context.begin_transaction():
+        print("Running migrations")
         context.run_migrations()
 
 
@@ -79,9 +88,11 @@ async def run_async_migrations() -> None:
     )
 
     async with connectable.connect() as connection:
+        print("Running migrations")
         await connection.run_sync(do_run_migrations)
 
     await connectable.dispose()
+
 
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode.
@@ -94,6 +105,8 @@ def run_migrations_online() -> None:
 
 
 if context.is_offline_mode():  # type: ignore
+    print("Offline mode")
     run_migrations_offline()
 else:
+    print("Online mode")
     run_migrations_online()

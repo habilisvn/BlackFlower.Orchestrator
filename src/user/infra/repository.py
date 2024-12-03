@@ -66,7 +66,6 @@ class UserRepository(AbstractRepository[UserEntity]):
 
         return result.scalars().all()  # type: ignore
 
-    # not tested
     async def delete(self, entity_id: UUID4) -> None:
         query = select(User).where(User.id == entity_id)
 

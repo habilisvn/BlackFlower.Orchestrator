@@ -7,6 +7,7 @@ from common.base import Base
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = {"extend_existing": True}
 
     id: Mapped[str] = mapped_column(UUID, primary_key=True, default=uuid4)
     email: Mapped[str] = mapped_column(unique=True)

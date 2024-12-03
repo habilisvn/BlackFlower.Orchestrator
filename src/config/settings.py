@@ -17,7 +17,10 @@ class Settings(BaseSettings):
     jwt_access_token_expire_minutes: int
     jwt_refresh_token_expire_days: int
 
-    model_config = SettingsConfigDict(env_file=".env")
+    def __new__(cls, env_file: str = ".env", *args, **kwargs):
+        cls.model_config = SettingsConfigDict(env_file=env_file)
+        instance = super().__new__(cls, *args, **kwargs)
+        return instance
 
 
 @lru_cache
