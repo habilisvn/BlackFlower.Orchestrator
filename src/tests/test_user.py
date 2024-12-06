@@ -1,8 +1,11 @@
+from os import getenv
+from dotenv import load_dotenv
 import pytest
 import httpx
 
 
-host = "http://localhost:8000"
+load_dotenv()
+host = getenv("HOST")
 
 
 @pytest.mark.asyncio

@@ -1,8 +1,11 @@
+from os import getenv
+from dotenv import load_dotenv
 import pytest
 import httpx
 
 
-host = "http://localhost:8000"
+load_dotenv()
+host = getenv("HOST")
 
 
 @pytest.mark.asyncio
@@ -27,9 +30,9 @@ async def test_create_node():
             "name": "test_node1",
             "description": "Test node description",
             "ip_address": "192.168.1.100",
-            "status": "active"
+            "status": "active",
         },
-        cookies=cookies
+        cookies=cookies,
     )
     data = response.json()
 
@@ -65,9 +68,9 @@ async def test_create_duplicate_node():
             "name": "test_node2",
             "description": "Test node description",
             "ip_address": "192.168.1.101",
-            "status": "active"
+            "status": "active",
         },
-        cookies=cookies
+        cookies=cookies,
     )
 
     try:
@@ -79,9 +82,9 @@ async def test_create_duplicate_node():
                 "name": "test_node2",
                 "description": "Test node description",
                 "ip_address": "192.168.1.101",
-                "status": "active"
+                "status": "active",
             },
-            cookies=cookies
+            cookies=cookies,
         )
         assert response.status_code == 400
     except AssertionError:
@@ -113,9 +116,9 @@ async def test_get_node():
             "name": "test_node3",
             "description": "Test node description",
             "ip_address": "192.168.1.102",
-            "status": "active"
+            "status": "active",
         },
-        cookies=cookies
+        cookies=cookies,
     )
     try:
         assert response.status_code == 201
@@ -127,8 +130,7 @@ async def test_get_node():
     try:
         # Get node by label
         response = httpx.get(
-            f"{host}/api/v1/nodes/test-node-3",
-            cookies=cookies
+            f"{host}/api/v1/nodes/test-node-3", cookies=cookies
         )
         data = response.json()
         assert response.status_code == 200
@@ -154,8 +156,7 @@ async def test_get_nonexistent_node():
     cookies = login_response.cookies
 
     response = httpx.get(
-        f"{host}/api/v1/nodes/nonexistent-label",
-        cookies=cookies
+        f"{host}/api/v1/nodes/nonexistent-label", cookies=cookies
     )
     try:
         assert response.status_code == 404
