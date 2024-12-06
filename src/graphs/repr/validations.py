@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class RelationshipBase(BaseModel):
@@ -23,6 +23,8 @@ class NodeRelationship(BaseModel):
 class NodeBase(BaseModel):
     label: str
     relationships: list[NodeRelationship | None] = []
+
+    model_config = ConfigDict(extra="allow")
 
 
 class NodeCreateIn(NodeBase):

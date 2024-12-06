@@ -11,28 +11,36 @@ async def get_node_repository(db: MongoDBDpd) -> NodeRepository:
 
 
 async def get_relationship_repository(
-    db: MongoDBDpd
+    db: MongoDBDpd,
 ) -> RelationshipRepository:
     return RelationshipRepository(db)
 
 
 async def validate_label_exists(
     node: NodeCreateIn,
-    node_repo: Annotated[NodeRepository, Depends(get_node_repository)]
+    node_repo: Annotated[NodeRepository, Depends(get_node_repository)],
 ) -> None:
-    if await node_repo.find_by_label(node.label):
+    if await node_repo.find_by_primary_key(node.label):
         raise HTTPException(status_code=400, detail="Node already exists")
+
+
+async def validate_label_not_exists(
+    label: str,
+    node_repo: Annotated[NodeRepository, Depends(get_node_repository)],
+) -> None:
+    if not await node_repo.find_by_primary_key(label):
+        raise HTTPException(status_code=404, detail="Node not found")
 
 
 async def validate_nodes_exist(
     relationship: RelationshipCreateIn,
-    node_repo: Annotated[NodeRepository, Depends(get_node_repository)]
+    node_repo: Annotated[NodeRepository, Depends(get_node_repository)],
 ) -> None:
     # Check if from_node exists
     from_node = await node_repo.find_by_label(relationship.from_node)
     if not from_node:
         raise HTTPException(status_code=404, detail="From node not found")
-    
+
     # Check if to_node exists
     to_node = await node_repo.find_by_label(relationship.to_node)
     if not to_node:
@@ -41,15 +49,16 @@ async def validate_nodes_exist(
 
 async def validate_relationship_exists(
     relationship: RelationshipCreateIn,
-    relationship_repo: Annotated[RelationshipRepository, Depends(get_relationship_repository)]
+    relationship_repo: Annotated[
+        RelationshipRepository, Depends(get_relationship_repository)
+    ],
 ) -> None:
     # Check if relationship already exists
     existing = await relationship_repo.find_relationship(
-        relationship.from_node,
-        relationship.to_node
+        relationship.from_node, relationship.to_node
     )
     if existing:
         raise HTTPException(
             status_code=400,
-            detail="Relationship between these nodes already exists"
+            detail="Relationship between these nodes already exists",
         )
