@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logstash
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: logstash
+  template:
+    metadata:
+      labels:
+        app: logstash
+    spec:
+      containers:
+        - name: logstash
+          image: docker.elastic.co/logstash/logstash:7.15.0
+          volumeMounts:
+            - name: config
+              mountPath: /usr/share/logstash/pipeline/logstash.conf
+              subPath: logstash.conf
+          ports:
+            - containerPort: 5044
+      volumes:
+        - name: config
+          configMap:
+            name: logstash-config
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: logstash-config
+data:
+  logstash.conf: |
+    input {
+      beats {
+        port => 5044
+      }
+      kafka {
+        bootstrap_servers => "kafka:9092"
+        topics => ["fastapi-logs"]
+        codec => json
+        decorate_events => true
+        group_id => "logstash"
+      }
+    }
+
+    filter {
+      if [fileset][module] == "postgresql" {
+        grok {
+          match => { "message" => "%{TIMESTAMP_ISO8601:timestamp} %{LOGLEVEL:loglevel} ... %{GREEDYDATA:query}" }
+          remove_field => ["message"]
+        }
+        date {
+          match => ["timestamp", "ISO8601"]
+        }
+      }
+    }
+
+    output {
+      if [@metadata][kafka] {
+        elasticsearch {
+          hosts => ["http://elasticsearch:9200"]
+          index => "kafka-logs-%{+YYYY.MM.dd}"
+          user => "elastic"
+          password => "abcd1234"
+        }
+      } else if [fileset][module] == "postgresql" {
+        elasticsearch {
+          hosts => ["http://elasticsearch:9200"]
+          index => "postgresql-logs-%{+YYYY.MM.dd}"
+          user => "elastic"
+          password => "abcd1234"
+        }
+      } else {
+        elasticsearch {
+          hosts => ["http://elasticsearch:9200"]
+          index => "general-logs-%{+YYYY.MM.dd}"
+          user => "elastic"
+          password => "abcd1234"
+        }
+      }
+    }
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: logstash
+spec:
+  selector:
+    app: logstash
+  ports:
+    - name: beats
+      protocol: TCP
+      port: 5044
+      targetPort: 5044
+    - name: monitoring
+      protocol: TCP
+      port: 9600
+      targetPort: 9600

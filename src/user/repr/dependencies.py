@@ -5,11 +5,11 @@ import jwt
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
-from common.dependencies import SessionDependency, SettingsDependency
+from common.dependencies import PostgresDpd, SettingsDpd
 from user.repr.validations import UserCreateIn
 
 
-async def get_user_repository(session: SessionDependency) -> UserRepository:
+async def get_user_repository(session: PostgresDpd) -> UserRepository:
     return UserRepository(session)
 
 
@@ -56,7 +56,7 @@ async def validate_email_exists(
 async def get_current_user(
     *,
     access_token: Annotated[str | None, Cookie()] = None,
-    settings: SettingsDependency,
+    settings: SettingsDpd,
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ) -> UserEntity:
     credentials_exception = HTTPException(

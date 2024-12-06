@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from pydantic import UUID4
+from pydantic import UUID4, ConfigDict
 
 
 class BaseEntity:
@@ -17,3 +17,7 @@ class BaseEntity:
 
     def update_timestamp(self):
         self.updated_at = datetime.now(timezone.utc)
+
+
+class BaseMongoEntity(BaseEntity):
+    model_config = ConfigDict(extra="allow")

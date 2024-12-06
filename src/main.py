@@ -2,21 +2,22 @@ import asyncio
 from contextlib import asynccontextmanager
 from datetime import datetime
 import os
-from typing import Any, Awaitable, Callable
-from fastapi import FastAPI, Request, Response
+from typing import Any
+from fastapi import FastAPI
 import logging
 import json
 import uvloop
 from uvicorn.logging import ColourizedFormatter
-from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi.middleware.cors import CORSMiddleware
 
 from common.exception_handlers import (
     final_error_handler,
     value_error_handler,
 )
 from common.exceptions import IsExistentException
+from common.middlewares import StoreRequestBodyMiddleware
 from user.router import router as user_router
-from config.session import create_db_and_tables
+from graphs.router import router as graph_router
 
 
 log_folder = "logs"
@@ -52,7 +53,7 @@ class CustomJsonFormatter(ColourizedFormatter):
             msg=f"Message: {json.dumps(new_msg)}",
             args=record.args,
             exc_info=record.exc_info,
-            func=record.funcName
+            func=record.funcName,
         )
 
         return super().format(new_record)
@@ -67,15 +68,13 @@ logging.config.dictConfig(  # type: ignore
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "format": (
-                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-                ),
+                "format": ("%(asctime)s - %(name)s - %(levelname)s - %(message)s"),
             },
             "json": {
                 "()": CustomJsonFormatter,
                 "use_colors": True,
                 "fmt": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-            }
+            },
         },
         "handlers": {
             "file": {
@@ -87,7 +86,16 @@ logging.config.dictConfig(  # type: ignore
             "console": {
                 "class": "logging.StreamHandler",
                 "formatter": "json",
-                "level": "INFO",
+                "level": "ERROR",
+            },
+            "kafka": {
+                "class": "common.error_handlers.KafkaHandler",
+                "level": "ERROR",
+                # TODO: Get the kafka server from .env file (future feature)
+                # DOCUMENT: if cannot connect to kafka, add "kafka" to the client's /etc/hosts file
+                # the detail check at docs/common_kuber_errors.txt
+                "kafka_config": {"bootstrap.servers": "localhost:9092"},
+                "topic": "fastapi-logs",
             },
         },
         "root": {
@@ -95,7 +103,8 @@ logging.config.dictConfig(  # type: ignore
             "handlers": [
                 "file",
                 "console",
-            ],  # Both file and console handlers for root logger
+                "kafka",
+            ],  # File, console and kafka handlers for root logger
         },
         "loggers": {
             "sqlalchemy.engine": {
@@ -103,7 +112,7 @@ logging.config.dictConfig(  # type: ignore
                 "propagate": False,  # Allow logs to propagate to root
             },
             "fastapi.error_logger": {
-                "handlers": ["file"],
+                "handlers": ["file", "kafka"],
                 "level": "ERROR",
                 "propagate": False,
             },
@@ -114,7 +123,7 @@ logging.config.dictConfig(  # type: ignore
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await create_db_and_tables()
+    # await create_db_and_tables()
 
     yield
 
@@ -122,31 +131,25 @@ async def lifespan(app: FastAPI):
 # DOCUMENT: Set uvloop as the default event loop policy
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
-app = FastAPI(lifespan=lifespan)
+app = FastAPI(lifespan=lifespan, responses={404: {"description": "Not found"}})
 app.include_router(user_router)
+app.include_router(graph_router)
 
 app.add_exception_handler(
-    IsExistentException, value_error_handler  # type: ignore
+    IsExistentException,
+    value_error_handler,  # type: ignore
 )
 app.add_exception_handler(Exception, final_error_handler)  # type: ignore
 
 
-# TEMPORARY: Remove this after
-class StoreRequestBodyMiddleware(BaseHTTPMiddleware):
-    async def dispatch(
-        self,
-        request: Request,
-        call_next: Callable[[Request], Awaitable[Response]]
-    ):
-        # Read the body as bytes
-        request_body = await request.body()
-
-        # Store the body in request.state
-        request.state.body = request_body  # Save the raw body for the handler
-
-        # Call the next handler in the middleware chain
-        response = await call_next(request)
-        return response
-
-
+# DOCUMENT: Add middleware to store the request body
 app.add_middleware(StoreRequestBodyMiddleware)
+
+# DOCUMENT: Add middleware to add CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_credentials=True,
+    allow_origins=["http://localhost:5173"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

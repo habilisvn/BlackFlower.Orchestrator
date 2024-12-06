@@ -4,6 +4,7 @@ from pydantic import UUID4
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
+from user.infra.services.notify import notify_user_created
 from user.repr.dependencies import (
     get_current_user,
     get_user_repository,
@@ -45,7 +46,7 @@ async def get_user(
     user_id: UUID4,
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ):
-    result = await user_repo.find_by_id(entity_id=user_id)
+    result = await user_repo.find_by_primary_key(entity_id=user_id)
     if not result:
         raise HTTPException(status_code=404, detail="User not found")
     return result
@@ -53,7 +54,8 @@ async def get_user(
 
 @router.post(
     "",
-    response_model=UserOut
+    response_model=UserOut,
+    status_code=201
 )
 async def create_user(
     user: UserCreateIn,
@@ -62,10 +64,23 @@ async def create_user(
     user_repo: Annotated[UserRepository, Depends(get_user_repository)]
 ):
     # Prepare the user entity
-    user_dict = user.model_dump()
-    user_dict.update({"username": username, "email": email})
-    user_entity = UserEntity(**user_dict)
+    user.username = username
+    user.email = email
 
-    # Save the user entity
-    result = await user_repo.save(user_entity)
-    return result
+    user_entity = UserEntity.model_validate(user)
+
+    # Save the user entity and get the new user entity
+    user_entity = await user_repo.save(user_entity)
+
+    # Send the user created event
+    await notify_user_created(user_entity)
+
+    return user_entity
+
+
+@router.delete("/{user_id}", status_code=204)
+async def delete_user(
+    user_id: UUID4,
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+):
+    await user_repo.delete(entity_id=user_id)

@@ -1,18 +1,10 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from typing import Any
-
-from pydantic import UUID4
 
 
 class AbstractRepository[T](ABC):
-    @dataclass(kw_only=True)
-    class WriteInfo[T2]:
-        entity: T2
-        write_info: dict[str, Any]
-
     @abstractmethod
-    async def save(self, entity: T) -> 'WriteInfo[T]':
+    async def save(self, entity: T, upsert: bool = False) -> T:
         """Save an entity to the repository."""
         pass
 
@@ -22,11 +14,11 @@ class AbstractRepository[T](ABC):
         pass
 
     @abstractmethod
-    async def find_by_id(self, entity_id: UUID4) -> T | None:
+    async def find_by_primary_key(self, primary_value: Any) -> T | None:
         """Find an entity by its ID."""
         pass
 
     @abstractmethod
-    async def delete(self, entity_id: UUID4) -> None:
+    async def delete(self, primary_value: Any) -> None:
         """Delete an entity from the repository by its ID."""
         pass

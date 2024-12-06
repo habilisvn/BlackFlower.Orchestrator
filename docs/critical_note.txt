@@ -1,3 +1,0 @@
-# Please check docker context if docker-compose connect to wrong socket
-docker context ls
--> to switch context, please run `docker context use <context_name>`

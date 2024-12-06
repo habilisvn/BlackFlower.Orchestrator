@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: postgres
+spec:
+  serviceName: postgres-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+      - name: postgres
+        image: postgres
+        env:
+        - name: POSTGRES_USER
+          value: "habilis"
+        - name: POSTGRES_PASSWORD
+          value: "abcd1234"
+        - name: POSTGRES_DB
+          value: "deep_brain"
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: postgres-data
+        ports:
+        - containerPort: 5432
+      volumes:
+        - name: postgres-data
+          hostPath:
+            path: /data/postgres_data # Or any directory you prefer for data persistence
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  ports:
+  - protocol: TCP
+    port: 5432
+    targetPort: 5432
+  type: NodePort
