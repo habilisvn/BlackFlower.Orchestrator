@@ -1,12 +1,12 @@
 from common.repository import AbstractRepository
 from graphs.domain import Label, NodeEntity, RelationshipEntity
-from common.dependencies import MongoDBDpd
+from common.dependencies.mongo import MongoDpd
 
 
 class NodeRepository(AbstractRepository[NodeEntity]):
     collection_name = "nodes"
 
-    def __init__(self, db: MongoDBDpd):
+    def __init__(self, db: MongoDpd):
         self.collection = db[self.collection_name]
 
     # Save node to MongoDB is upsert
@@ -38,7 +38,7 @@ class NodeRepository(AbstractRepository[NodeEntity]):
 class RelationshipRepository(AbstractRepository[RelationshipEntity]):
     collection_name = "relationships"
 
-    def __init__(self, db: MongoDBDpd):
+    def __init__(self, db: MongoDpd):
         self.collection = db[self.collection_name]
 
     async def save(

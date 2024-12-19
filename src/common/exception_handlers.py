@@ -11,8 +11,14 @@ logger = logging.getLogger(__name__)
 async def get_request_data(request: Request):
     """Helper function to read and return request data for logging."""
     # Access the stored request body from the middleware
-    request_body = (request.state.body.decode("utf-8")
-                    if request.state.body else "<empty body>")
+    if request.state.body and b"file" in request.state.body:
+        request_body = "<file upload>"
+    else:
+        request_body = (
+            request.state.body.decode("utf-8")
+            if request.state.body
+            else "<empty body>"
+        )
 
     request_data = {
         "method": request.method,
@@ -36,6 +42,5 @@ async def final_error_handler(request: Request, exc: Exception):
 
 async def value_error_handler(request: Request, exc: IsExistentException):
     return JSONResponse(
-        status_code=400,
-        content={"detail": str(exc).capitalize()}
+        status_code=400, content={"detail": str(exc).capitalize()}
     )

@@ -4,7 +4,7 @@ from sqlmodel import select
 from common.repository import AbstractRepository
 from user.domain.entities import UserEntity
 from user.infra.orm import User
-from common.dependencies import PostgresDpd
+from common.dependencies.postgres import PostgresDpd
 
 
 class UserRepository(AbstractRepository[UserEntity]):

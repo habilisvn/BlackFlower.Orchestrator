@@ -22,6 +22,7 @@ class BaseEntity(BaseModel):
     @model_validator(mode="before")
     def _model_entry(cls, _input: Any) -> Any:
         if isinstance(_input, Base) or isinstance(_input, BaseModel):
+            # convert from sqlalchemy model or pydantic model to dictionary
             return jsonable_encoder(_input)
         return _input
 

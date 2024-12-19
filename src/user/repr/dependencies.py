@@ -5,7 +5,8 @@ import jwt
 
 from user.domain.entities import UserEntity
 from user.infra.repository import UserRepository
-from common.dependencies import PostgresDpd, SettingsDpd
+from common.dependencies.postgres import PostgresDpd
+from common.dependencies.settings import SettingsDpd
 from user.repr.validations import UserCreateIn
 
 

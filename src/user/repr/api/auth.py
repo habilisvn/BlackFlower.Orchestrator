@@ -2,7 +2,7 @@ from typing import Annotated, Any
 from fastapi import Depends, APIRouter, Response
 from datetime import timedelta
 
-from common.dependencies import SettingsDpd
+from common.dependencies.settings import SettingsDpd
 from user.domain.entities import UserEntity
 from user.repr.dependencies import validate_user_exists
 from user.utils import create_access_token

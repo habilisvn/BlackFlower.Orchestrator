@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: memcached
+spec:
+  serviceName: memcached
+  replicas: 1
+  selector:
+    matchLabels:
+      app: memcached
+  template:
+    metadata:
+      labels:
+        app: memcached
+    spec:
+      containers:
+      - name: memcached
+        image: memcached:1.6.21-alpine
+        ports:
+        - containerPort: 11211
+          name: memcache
+        args:
+        - '-m 128'      # Memory limit in MB
+        - '-c 1024'     # Max simultaneous connections
+        - '-v'          # Verbose logging
+        resources:
+          requests:
+            memory: "150Mi"
+            cpu: "100m"
+          limits:
+            memory: "200Mi"
+            cpu: "200m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: memcached
+spec:
+  selector:
+    app: memcached
+  ports:
+  - port: 11211
+    name: memcache
+    targetPort: memcache
+  type: ClusterIP

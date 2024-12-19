@@ -2,16 +2,16 @@ from typing import Annotated
 from fastapi import Depends, HTTPException
 
 from graphs.infra.repository import NodeRepository, RelationshipRepository
-from common.dependencies import MongoDBDpd
+from common.dependencies.mongo import MongoDpd
 from graphs.repr.validations import NodeCreateIn, RelationshipCreateIn
 
 
-async def get_node_repository(db: MongoDBDpd) -> NodeRepository:
+async def get_node_repository(db: MongoDpd) -> NodeRepository:
     return NodeRepository(db)
 
 
 async def get_relationship_repository(
-    db: MongoDBDpd,
+    db: MongoDpd,
 ) -> RelationshipRepository:
     return RelationshipRepository(db)
 

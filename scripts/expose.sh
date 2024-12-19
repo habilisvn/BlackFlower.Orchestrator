@@ -18,4 +18,7 @@ minikube kubectl port-forward svc/neo4j 7474:7474 7687:7687 &
 echo "Exposing MongoDB service..."
 minikube kubectl port-forward svc/mongodb 27017:27017 &
 
+echo "Exposing Memcached service..."
+minikube kubectl port-forward svc/memcached 11211:11211 &
+
 wait

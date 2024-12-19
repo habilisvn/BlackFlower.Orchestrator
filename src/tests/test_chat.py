@@ -3,8 +3,6 @@ import pytest
 from os import getenv
 from dotenv import load_dotenv
 
-from user.repr.api.chat import ChatMessage
-
 
 load_dotenv()
 host = getenv("HOST")
@@ -25,28 +23,25 @@ async def test_chat_endpoint():
     cookies = login_response.cookies
 
     # Prepare test data
-    message = ChatMessage(message="Hello")
+    message = {"message": "Hello"}
 
     try:
         # Make request to chat endpoint
         response = httpx.post(
-            f"{host}/api/v1/chat",
-            json=message.model_dump(),
-            cookies=cookies
+            f"{host}/api/v1/chat/completions", json=message, cookies=cookies
         )
 
         # Assert response
         assert response.status_code == 200
-        assert response.json() == {"reply": "Received message!"}
     except AssertionError:
         print(response.json())
         raise
 
 
 @pytest.mark.asyncio
-async def test_chat_endpoint_without_login():
+async def test_chat_endpoint_without_body():
     # Test with invalid data
-    response = httpx.post(f"{host}/api/v1/chat", json={})
+    response = httpx.post(f"{host}/api/v1/chat/completions", json={})
 
     # Assert response
-    assert response.status_code == 401  # Validation error
+    assert response.status_code == 422  # Validation error

@@ -18,6 +18,7 @@ from common.exceptions import IsExistentException
 from common.middlewares import StoreRequestBodyMiddleware
 from user.router import router as user_router
 from graphs.router import router as graph_router
+from chat.router import router as chat_router
 
 
 log_folder = "logs"
@@ -68,7 +69,9 @@ logging.config.dictConfig(  # type: ignore
         "disable_existing_loggers": False,
         "formatters": {
             "default": {
-                "format": ("%(asctime)s - %(name)s - %(levelname)s - %(message)s"),
+                "format": (
+                    "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+                ),
             },
             "json": {
                 "()": CustomJsonFormatter,
@@ -92,8 +95,6 @@ logging.config.dictConfig(  # type: ignore
                 "class": "common.error_handlers.KafkaHandler",
                 "level": "ERROR",
                 # TODO: Get the kafka server from .env file (future feature)
-                # DOCUMENT: if cannot connect to kafka, add "kafka" to the client's /etc/hosts file
-                # the detail check at docs/common_kuber_errors.txt
                 "kafka_config": {"bootstrap.servers": "localhost:9092"},
                 "topic": "fastapi-logs",
             },
@@ -134,6 +135,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 app = FastAPI(lifespan=lifespan, responses={404: {"description": "Not found"}})
 app.include_router(user_router)
 app.include_router(graph_router)
+app.include_router(chat_router)
 
 app.add_exception_handler(
     IsExistentException,

@@ -15,9 +15,7 @@ from user.repr.validations import UserCreateIn, UserOut
 
 
 router = APIRouter(
-    prefix="/v1/users",
-    tags=["user"],
-    dependencies=[Depends(get_current_user)]
+    prefix="/v1/users", tags=["user"], dependencies=[Depends(get_current_user)]
 )
 
 
@@ -26,25 +24,18 @@ async def get_users(
     *,
     page: Annotated[int, Query(ge=1)] = 1,
     page_size: Annotated[int, Query(ge=1, le=100)] = 10,
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
 ):
     offset = (page - 1) * page_size
-    result = await user_repo.find_all(
-        limit=page_size,
-        offset=offset
-    )
+    result = await user_repo.find_all(limit=page_size, offset=offset)
 
-    return {
-        "data": result,
-        "page": page,
-        "page_size": page_size
-    }
+    return {"data": result, "page": page, "page_size": page_size}
 
 
 @router.get("/{user_id}", response_model=UserOut)
 async def get_user(
     user_id: UUID4,
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
 ):
     result = await user_repo.find_by_primary_key(entity_id=user_id)
     if not result:
@@ -52,16 +43,12 @@ async def get_user(
     return result
 
 
-@router.post(
-    "",
-    response_model=UserOut,
-    status_code=201
-)
+@router.post("", response_model=UserOut, status_code=201)
 async def create_user(
     user: UserCreateIn,
     username: Annotated[str, Depends(validate_username_exists)],
     email: Annotated[str, Depends(validate_email_exists)],
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
 ):
     # Prepare the user entity
     user.username = username
@@ -81,6 +68,6 @@ async def create_user(
 @router.delete("/{user_id}", status_code=204)
 async def delete_user(
     user_id: UUID4,
-    user_repo: Annotated[UserRepository, Depends(get_user_repository)]
+    user_repo: Annotated[UserRepository, Depends(get_user_repository)],
 ):
     await user_repo.delete(entity_id=user_id)

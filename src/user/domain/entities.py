@@ -30,4 +30,3 @@ class UserEntity(BaseEntity):
     def activate(self):
         self.is_active = True
         self.updated_at = datetime.now()
-
