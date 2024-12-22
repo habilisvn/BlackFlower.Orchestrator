@@ -1,6 +1,6 @@
 from openai import OpenAI
 
-from chat.domain.entities import ChatMessage
+from ai.domain.entities import ChatMessage
 from services.chat.base import ChatService
 from common.mixins import SettingsMixin
 

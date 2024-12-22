@@ -1,0 +1,2 @@
+When adding comments or documents, please correct grammar mistakes only and do not change the content in any way (e.g., adding information).
+When adding code, please add comments to explain the code.

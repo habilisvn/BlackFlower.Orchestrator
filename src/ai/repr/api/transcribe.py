@@ -1,28 +1,18 @@
 from fastapi import APIRouter, UploadFile
 import httpx
 
-from chat.domain.entities import ChatMessage
-from chat.repr.validations import ChatInput, ChatOutput
-from common.dependencies.huggingface import ChatServiceDpd
 from common.dependencies.settings import SettingsDpd
+from ai.repr.validations import ChatOutput
 
 
 router = APIRouter(
-    prefix="/v1/chat",
+    prefix="/v1/chat/transcribe",
     tags=["chat"],
     # dependencies=[Depends(get_current_user)],
 )
 
 
-@router.post("/completions")
-async def chat(input: ChatInput, chat_service: ChatServiceDpd) -> ChatOutput:
-    chat_msg = ChatMessage(role="user", content=input.message)
-    reply = await chat_service.send_message(chat_msg)
-
-    return ChatOutput(reply=reply)
-
-
-@router.post("/transcribe")
+@router.post("")
 async def transcribe(
     upload_file: UploadFile, settings: SettingsDpd
 ) -> ChatOutput:
