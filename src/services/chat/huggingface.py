@@ -1,6 +1,6 @@
 from huggingface_hub import InferenceClient
 
-from ai.domain.entities import ChatMessage
+from chat.domain.entities import ChatMessage
 from services.chat.base import ChatService
 from common.mixins import SettingsMixin
 

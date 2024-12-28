@@ -18,7 +18,7 @@ from common.exceptions import IsExistentException
 from common.middlewares import StoreRequestBodyMiddleware
 from user.router import router as user_router
 from graphs.router import router as graph_router
-from ai.router import router as ai_router
+from chat.router import router as chat_router
 
 
 log_folder = "logs"
@@ -135,7 +135,7 @@ asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 app = FastAPI(lifespan=lifespan, responses={404: {"description": "Not found"}})
 app.include_router(user_router)
 app.include_router(graph_router)
-app.include_router(ai_router)
+app.include_router(chat_router)
 
 app.add_exception_handler(
     IsExistentException,

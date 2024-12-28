@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from ai.domain.entities import ChatMessage
-from ai.repr.validations import ChatInput, ChatOutput
+from chat.domain.entities import ChatMessage
+from chat.repr.validations import ChatInput, ChatOutput
 from common.dependencies.huggingface import ChatServiceDpd
 
 

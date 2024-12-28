@@ -2,7 +2,7 @@ from fastapi import APIRouter, UploadFile
 import httpx
 
 from common.dependencies.settings import SettingsDpd
-from ai.repr.validations import ChatOutput
+from chat.repr.validations import ChatOutput
 
 
 router = APIRouter(
